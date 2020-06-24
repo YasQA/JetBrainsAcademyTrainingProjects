@@ -1,0 +1,2 @@
+# JetBrainsAcademyTrainingProjects
+JetBrains Academy Training Projects
