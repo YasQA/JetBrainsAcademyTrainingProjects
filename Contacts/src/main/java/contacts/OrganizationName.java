@@ -1,6 +1,8 @@
 package contacts;
 
-class OrganizationName implements Name {
+import java.io.Serializable;
+
+class OrganizationName implements Name, Serializable {
     private String name;
 
     @Override

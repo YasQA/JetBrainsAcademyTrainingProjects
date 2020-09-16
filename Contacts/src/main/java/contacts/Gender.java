@@ -1,6 +1,8 @@
 package contacts;
 
-class Gender {
+import java.io.Serializable;
+
+class Gender implements Serializable {
     private String gender;
 
     public String getGender() {

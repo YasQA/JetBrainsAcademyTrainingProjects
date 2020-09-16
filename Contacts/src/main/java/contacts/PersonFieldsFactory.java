@@ -50,8 +50,4 @@ class PersonFieldsFactory implements ContactFieldsFactory {
     public TimeEdited createTimeEdited() {
         return new TimeEdited();
     }
-
-    public IsPerson createIsPersonTrue() {
-        return new IsPerson(true);
-    }
 }

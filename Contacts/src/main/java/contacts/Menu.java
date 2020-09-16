@@ -7,47 +7,61 @@ class Menu {
         this.phonebook = phonebook;
     }
 
-    public void displayMenu() {
-        System.out.print("Enter action (add, remove, edit, count, info, exit): ");
+    public void displayMainMenu() {
+        System.out.print("[Menu] Enter action (add, list, search, count, exit): ");
     }
 
-    public void actWithMenu(String menuItem) {
+    public void actWithMainMenu(String menuItem) {
         switch (menuItem) {
             case "add":
                 System.out.print("Enter the type (person, organization): ");
                 String type = Main.sc.nextLine();
-                if ("person".equals(type)) {
-                    phonebook.addContactPerson();
-                } else if ("organization".equals(type)) {
-                    phonebook.addContactOrganization();
-                } else {
-                    System.out.println("Wrong contact type!");
-                }
-                System.out.println();
+                phonebook.addContact(type);
                 break;
-            case "remove":
-                phonebook.removeContact();
-                System.out.println();
-                break;
-            case "edit":
-                phonebook.editContact();
-                System.out.println();
+            case "list":
+                phonebook.listPhonebook();
                 break;
             case "count":
                 phonebook.countContactsString();
-                System.out.println();
-                break;
-            case "info":
-                phonebook.getContactInfo();
-                System.out.println();
                 break;
             case "exit":
                 phonebook.exit();
-                System.out.println();
                 break;
             default:
                 System.out.println("Wrong operation");
                 System.out.println();
+        }
+    }
+
+    public void recordMenu(int contactNumber) {
+        System.out.print("[record] Enter action (edit, delete, menu): ");
+        String command = Main.sc.nextLine();
+        switch (command) {
+            case "menu" :
+                break;
+            case "edit":
+                phonebook.editContact(contactNumber);
+                phonebook.getContactInfo(contactNumber);
+                recordMenu(contactNumber);
+                break;
+            case "delete" :
+                phonebook.removeContact(contactNumber);
+                break;
+        }
+    }
+
+    public void listMenu() {
+        System.out.print("[list] Enter action ([number], back): ");
+        String command = Main.sc.nextLine();
+        if ("back".equals(command)) {
+            return;
+        } else try {
+            int contactNumber = Integer.parseInt(command);
+            phonebook.getContactInfo(contactNumber);
+            recordMenu(contactNumber);
+        } catch (NumberFormatException e) {
+            System.out.println("Wrong number/command!");
+            System.out.println();
         }
     }
 }

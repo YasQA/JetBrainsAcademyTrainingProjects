@@ -1,9 +1,10 @@
 package contacts;
 
+import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class PhoneNumber implements PhoneNumberGeneral {
+class PhoneNumber implements PhoneNumberGeneral, Serializable {
     private String phoneNumber;
 
     @Override

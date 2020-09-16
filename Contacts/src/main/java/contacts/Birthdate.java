@@ -1,6 +1,8 @@
 package contacts;
 
-class Birthdate {
+import java.io.Serializable;
+
+class Birthdate implements Serializable {
     private String birthdate;
 
     public String getBirthdate() {

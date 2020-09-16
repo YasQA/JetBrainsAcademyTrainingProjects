@@ -1,6 +1,8 @@
 package contacts;
 
-class OrganizationalAddress implements Address {
+import java.io.Serializable;
+
+class OrganizationalAddress implements Address, Serializable {
     private String address;
 
     @Override

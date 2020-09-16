@@ -1,9 +1,10 @@
 package contacts;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
-class TimeCreated {
+class TimeCreated implements Serializable {
     private final LocalDateTime timeCreated;
 
     TimeCreated() {

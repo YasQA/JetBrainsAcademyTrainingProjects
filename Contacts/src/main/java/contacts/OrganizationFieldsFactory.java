@@ -35,7 +35,4 @@ class OrganizationFieldsFactory implements ContactFieldsFactory {
         return new TimeEdited();
     }
 
-    public IsPerson createIsPersonFalse() {
-        return new IsPerson(false);
-    }
 }

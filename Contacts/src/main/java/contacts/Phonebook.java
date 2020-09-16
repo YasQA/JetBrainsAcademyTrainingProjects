@@ -1,117 +1,78 @@
 package contacts;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.List;
 
-class Phonebook {
+class Phonebook implements Serializable {
+    private static final long serialVersionUID = 7L;
+
     ArrayList<Contact> phonebookContactList = new ArrayList<>();
-    Menu menu = new Menu(this);
-    Scanner sc = new Scanner(System.in);
     boolean isON = true;
+    transient boolean workWithFile = false;
 
-    Contact contact;
-    ContactFactory personFactory = new ContactPersonFactory();
-    ContactFactory organizationFactory = new ContactOrganizationFactory();
+    transient Menu menu = new Menu(this);
+
+    private Contact contact;
+    private transient final ContactFactory personFactory = new ContactPersonFactory();
+    private transient final ContactFactory organizationFactory = new ContactOrganizationFactory();
+
+    public void addContact(String type) {
+        if ("person".equals(type)) {
+            addContactPerson();
+        } else if ("organization".equals(type)) {
+            addContactOrganization();
+        } else {
+            System.out.println("Wrong contact type!");
+        }
+        if (workWithFile) {
+            SerializationUtils.savePhonebook(phonebookContactList, "phonebook.db");
+        }
+        System.out.println();
+    }
 
     public void addContactPerson() {
         contact = personFactory.createContact();
         phonebookContactList.add(contact);
-        System.out.println("The record added.");
+        System.out.println("A record added.");
     }
 
     public void addContactOrganization() {
         contact = organizationFactory.createContact();
         phonebookContactList.add(contact);
-        System.out.println("The record added.");
+        System.out.println("A record added.");
     }
 
-    public void removeContact() {
-        if (countContacts() == 0) {
-            System.out.println("No records to remove!");
-        } else {
-            listPhonebook();
-            System.out.println("Select a record: ");
-            int contactNumber = Integer.parseInt(sc.nextLine());
-            // TODO: check number if exists !!!
-            phonebookContactList.remove(phonebookContactList.get(contactNumber - 1));
-            System.out.println("The record removed!");
+    public void removeContact(int contactNumber) {
+        phonebookContactList.remove(phonebookContactList.get(contactNumber - 1));
+        if (workWithFile) {
+            SerializationUtils.savePhonebook(phonebookContactList, "phonebook.db");
         }
+        System.out.println("The record removed!");
     }
 
-    public void editContact() {
-        if (phonebookContactList.size() == 0) {
-            System.out.println("No records to edit");
+    public void editContact(int index) {
+        Contact contactToEdit = phonebookContactList.get(index - 1);
+        List<String> editableFields = contactToEdit.returnEditableFields();
+        String listOfFields = String.join(", ", editableFields);
+
+        System.out.print("Select a field (" + listOfFields + "): ");
+        String field = Main.sc.nextLine();
+
+        if (!editableFields.contains(field)) {
+            System.out.println("Wrong field specified!");
         } else {
-            listPhonebook();
-            System.out.print("Select a record: ");
-            int index = Integer.parseInt(sc.nextLine());
-
-            Contact contactToEdit = phonebookContactList.get(index - 1);
-
-            if (isPerson(contactToEdit)) {
-                System.out.print("Select a field (name, surname, birth, gender, number): ");
-                String field = sc.nextLine();
-                //TODO: check correctness of selected field
-                editContactPerson((ContactPerson)contactToEdit, field);
-            } else {
-                System.out.print("Select a field (organization name, address, number): ");
-                String field = sc.nextLine();
-                //TODO: check correctness of selected field
-                editContactOrganization((ContactOrganization)contactToEdit, field);
+            System.out.print("Enter " + field + ": ");
+            String value = Main.sc.nextLine();
+            contactToEdit.editField(field, value);
+            contactToEdit.timeEdited.setTimeEdited(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
+            if (workWithFile) {
+                SerializationUtils.savePhonebook(phonebookContactList, "phonebook.db");
             }
-
-            System.out.println("The record updated!");
+            System.out.println("Saved");
         }
-    }
-
-    public void editContactPerson(ContactPerson contact, String field) {
-        switch (field) {
-            case "name":
-                System.out.print("Enter name: ");
-                contact.name.setName(Main.sc.nextLine());
-                break;
-            case "surname":
-                System.out.print("Enter surname: ");
-                contact.surname.setSurname(Main.sc.nextLine());
-                break;
-            case "number":
-                System.out.print("Enter number: ");
-                contact.phoneNumber.setPhoneNumber(Main.sc.nextLine());
-                break;
-            case "gender":
-                System.out.println("Enter gender: ");
-                contact.gender.setGender(Main.sc.nextLine());
-                break;
-            case "birth":
-                System.out.println("Enter birthdate: ");
-                contact.birthdate.setBirthdate(Main.sc.nextLine());
-                break;
-            default:
-                System.out.println("Wrong field specified!");
-        }
-        contact.timeEdited.setTimeEdited(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
-    }
-
-    public void editContactOrganization(ContactOrganization contact, String field) {
-        switch (field) {
-            case "name":
-                System.out.print("Enter name: ");
-                contact.name.setName(Main.sc.nextLine());
-                break;
-            case "number":
-                System.out.print("Enter number: ");
-                contact.phoneNumber.setPhoneNumber(Main.sc.nextLine());
-                break;
-            case "address":
-                System.out.println("Enter address: ");
-                contact.address.setAddress(Main.sc.nextLine());
-                break;
-            default:
-                System.out.println("Wrong field specified!");
-        }
-        contact.timeEdited.setTimeEdited(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
     }
 
     public int countContacts() {
@@ -120,38 +81,17 @@ class Phonebook {
 
     public void countContactsString() {
         System.out.println("The Phone Book has " + countContacts() + " records");
+        System.out.println();
     }
 
-    public void getContactInfo() {
+    public void getContactInfo(int contactNumber) {
         int numberOfContacts = countContacts();
-
-        if (numberOfContacts == 0) {
-            System.out.println("The Phone Book has 0 records.");
+        if (contactNumber > 0 & contactNumber <= numberOfContacts) {
+            showContactInfo(contactNumber);
+            System.out.println();
         } else {
-            listPhonebook();
-            System.out.print("Enter index to show info: ");
-            int contactNumber = Integer.parseInt(Main.sc.nextLine());
-            if (contactNumber > 0 & contactNumber <= numberOfContacts) {
-                showContactInfo(contactNumber);
-            } else {
-                System.out.println("Wrong number");
-            }
+            System.out.println("Wrong number!");
         }
-    }
-
-    public void listPhonebook() {
-        for (int i = 1; i <= countContacts(); i++) {
-            Contact contact = phonebookContactList.get(i - 1);
-            if (isPerson(contact)) {
-                System.out.println(i + ". " + contact.name.toString() + " " + ((ContactPerson)contact).surname.toString());
-            } else {
-                System.out.println(i + ". " + contact.name.toString());
-            }
-        }
-    }
-
-    public boolean isPerson(Contact contact) {
-        return contact.isPerson.getIsPerson();
     }
 
     public void showContactInfo(int i) {
@@ -159,7 +99,22 @@ class Phonebook {
         System.out.println(contact.toString());
     }
 
+    public void listPhonebook() {
+        if (phonebookContactList.size() == 0) {
+            System.out.println("The Phone Book has 0 records.");
+        } else {
+            for (int i = 1; i <= countContacts(); i++) {
+                Contact contact = phonebookContactList.get(i - 1);
+                System.out.println(i + ". " + (contact.getFieldValue("name") + " " + contact.getFieldValue("surname")).trim());
+            }
+            System.out.println();
+            menu.listMenu();
+        }
+        System.out.println();
+    }
+
     public void exit() {
         isON = false;
+        System.out.println();
     }
 }

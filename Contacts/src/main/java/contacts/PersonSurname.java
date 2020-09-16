@@ -1,6 +1,8 @@
 package contacts;
 
-class PersonSurname implements Surname {
+import java.io.Serializable;
+
+class PersonSurname implements Surname, Serializable {
     private String surname;
 
     @Override

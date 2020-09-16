@@ -1,12 +1,15 @@
 package contacts;
 
-class ContactPerson extends Contact {
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+class ContactPerson extends Contact implements Serializable {
     Surname surname;
     Birthdate birthdate;
     Gender gender;
 
     ContactPerson(PersonFieldsFactory fieldsFactory) {
-        isPerson = fieldsFactory.createIsPersonTrue();
         name = fieldsFactory.createName();
         surname = fieldsFactory.createSurname();
         birthdate = fieldsFactory.createBirthdate();
@@ -25,5 +28,55 @@ class ContactPerson extends Contact {
                 + "Number: " + phoneNumber.toString() + "\n"
                 + "Time created: " + timeCreated.toString() + "\n"
                 + "Time last edit: " + timeEdited.toString();
+    }
+
+    @Override
+    public List<String> returnEditableFields() {
+        List<String> fieldsList = new ArrayList<>();
+        fieldsList.add("name");
+        fieldsList.add("surname");
+        fieldsList.add("birth");
+        fieldsList.add("gender");
+        fieldsList.add("number");
+        return fieldsList;
+    }
+
+    @Override
+    public void editField(String fieldToEdit, String value) {
+        switch (fieldToEdit) {
+            case "name":
+                name.setName(value);
+                break;
+            case "surname":
+                surname.setSurname(value);
+                break;
+            case "birthday":
+                birthdate.setBirthdate(value);
+                break;
+            case "gender":
+                gender.setGender(value);
+                break;
+            case "number":
+                phoneNumber.setPhoneNumber(value);
+                break;
+        }
+    }
+
+    @Override
+    public String getFieldValue(String field) {
+        switch (field) {
+            case "name":
+                return name.getName();
+            case "surname":
+                return surname.getSurname();
+            case "birthday":
+                return birthdate.getBirthdate();
+            case "gender":
+                return gender.getGender();
+            case "number":
+                return phoneNumber.getPhoneNumber();
+            default:
+                return "Wrong field name!";
+        }
     }
 }
