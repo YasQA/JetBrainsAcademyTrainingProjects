@@ -1,5 +1,7 @@
 package contacts;
 
+import java.util.List;
+
 class Menu {
     Phonebook phonebook;
 
@@ -21,8 +23,11 @@ class Menu {
             case "list":
                 phonebook.listPhonebook();
                 break;
+            case "search":
+                phonebook.searchPhonebook();
+                break;
             case "count":
-                phonebook.countContactsString();
+                phonebook.countContactsToString();
                 break;
             case "exit":
                 phonebook.exit();
@@ -38,10 +43,11 @@ class Menu {
         String command = Main.sc.nextLine();
         switch (command) {
             case "menu" :
+                System.out.println();
                 break;
             case "edit":
                 phonebook.editContact(contactNumber);
-                phonebook.getContactInfo(contactNumber);
+                phonebook.getContactInfo(phonebook.contactList, contactNumber);
                 recordMenu(contactNumber);
                 break;
             case "delete" :
@@ -57,11 +63,28 @@ class Menu {
             return;
         } else try {
             int contactNumber = Integer.parseInt(command);
-            phonebook.getContactInfo(contactNumber);
+            phonebook.getContactInfo(phonebook.contactList, contactNumber);
             recordMenu(contactNumber);
         } catch (NumberFormatException e) {
             System.out.println("Wrong number/command!");
             System.out.println();
+        }
+    }
+
+    public void searchMenu(List<Contact> searchResultsList) {
+        System.out.print("[search] Enter action ([number], back, again): ");
+        String command = Main.sc.nextLine();
+        if ("back".equals(command)) {
+            return;
+        } else if ("again".equals(command)) {
+            phonebook.searchPhonebook();
+        } else try {
+            int contactNumber = Integer.parseInt(command);
+            phonebook.getContactInfo(searchResultsList, contactNumber);
+            recordMenu(contactNumber);
+            } catch (NumberFormatException e) {
+                System.out.println("Wrong number/command!");
+                System.out.println();
         }
     }
 }

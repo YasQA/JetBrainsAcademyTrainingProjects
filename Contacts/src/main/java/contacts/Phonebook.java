@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 class Phonebook implements Serializable {
-    private static final long serialVersionUID = 7L;
+    private static final long serialVersionUID = 8L;
 
-    ArrayList<Contact> phonebookContactList = new ArrayList<>();
+    ArrayList<Contact> contactList = new ArrayList<>();
     boolean isON = true;
     transient boolean workWithFile = false;
 
@@ -28,33 +28,33 @@ class Phonebook implements Serializable {
             System.out.println("Wrong contact type!");
         }
         if (workWithFile) {
-            SerializationUtils.savePhonebook(phonebookContactList, "phonebook.db");
+            SerializationUtils.savePhonebook(contactList, "phonebook.db");
         }
         System.out.println();
     }
 
     public void addContactPerson() {
         contact = personFactory.createContact();
-        phonebookContactList.add(contact);
+        contactList.add(contact);
         System.out.println("A record added.");
     }
 
     public void addContactOrganization() {
         contact = organizationFactory.createContact();
-        phonebookContactList.add(contact);
+        contactList.add(contact);
         System.out.println("A record added.");
     }
 
     public void removeContact(int contactNumber) {
-        phonebookContactList.remove(phonebookContactList.get(contactNumber - 1));
+        contactList.remove(contactList.get(contactNumber - 1));
         if (workWithFile) {
-            SerializationUtils.savePhonebook(phonebookContactList, "phonebook.db");
+            SerializationUtils.savePhonebook(contactList, "phonebook.db");
         }
         System.out.println("The record removed!");
     }
 
     public void editContact(int index) {
-        Contact contactToEdit = phonebookContactList.get(index - 1);
+        Contact contactToEdit = contactList.get(index - 1);
         List<String> editableFields = contactToEdit.returnEditableFields();
         String listOfFields = String.join(", ", editableFields);
 
@@ -69,48 +69,71 @@ class Phonebook implements Serializable {
             contactToEdit.editField(field, value);
             contactToEdit.timeEdited.setTimeEdited(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
             if (workWithFile) {
-                SerializationUtils.savePhonebook(phonebookContactList, "phonebook.db");
+                SerializationUtils.savePhonebook(contactList, "phonebook.db");
             }
             System.out.println("Saved");
         }
     }
 
     public int countContacts() {
-        return phonebookContactList.size();
+        return contactList.size();
     }
 
-    public void countContactsString() {
+    public void countContactsToString() {
         System.out.println("The Phone Book has " + countContacts() + " records");
         System.out.println();
     }
 
-    public void getContactInfo(int contactNumber) {
+    public void getContactInfo(List<Contact> contactList, int contactNumber) {
         int numberOfContacts = countContacts();
         if (contactNumber > 0 & contactNumber <= numberOfContacts) {
-            showContactInfo(contactNumber);
+            showContactInfo(contactList, contactNumber);
             System.out.println();
         } else {
             System.out.println("Wrong number!");
         }
     }
 
-    public void showContactInfo(int i) {
-        Contact contact = phonebookContactList.get(i - 1);
+    public void showContactInfo(List<Contact> contactList, int i) {
+        Contact contact = contactList.get(i - 1);
         System.out.println(contact.toString());
     }
 
     public void listPhonebook() {
-        if (phonebookContactList.size() == 0) {
+        if (contactList.size() == 0) {
             System.out.println("The Phone Book has 0 records.");
         } else {
-            for (int i = 1; i <= countContacts(); i++) {
-                Contact contact = phonebookContactList.get(i - 1);
-                System.out.println(i + ". " + (contact.getFieldValue("name") + " " + contact.getFieldValue("surname")).trim());
-            }
-            System.out.println();
+            listContacts(contactList);
             menu.listMenu();
         }
         System.out.println();
+    }
+
+    public void listSearchResults(List<Contact> searchResultsList) {
+        System.out.println("Found " + searchResultsList.size() + " results:");
+        listContacts(searchResultsList);
+    }
+
+    private void listContacts(List<Contact> contactList) {
+        for (int i = 0; i < contactList.size(); i++) {
+            Contact contact = contactList.get(i);
+            System.out.println((i + 1) + ". " + (contact.getFieldValue("name") + " "
+                    + contact.getFieldValue("surname")).trim());
+        }
+        System.out.println();
+    }
+
+    public void searchPhonebook() {
+        System.out.print("Enter search query: ");
+        String searchString = Main.sc.nextLine();
+        List<Contact> searchResultsList = SearchUtils.searchContacts(contactList, searchString);
+        if (searchResultsList.size() == 0) {
+            System.out.println("Search result is empty, try another parameters");
+            System.out.println();
+        } else {
+            listSearchResults(searchResultsList);
+            menu.searchMenu(searchResultsList);
+        }
     }
 
     public void exit() {

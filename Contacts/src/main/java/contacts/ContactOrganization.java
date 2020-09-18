@@ -25,6 +25,13 @@ class ContactOrganization extends Contact implements Serializable {
     }
 
     @Override
+    public String fieldsString() {
+        return name.toString() + " "
+                + address.toString() + " "
+                + phoneNumber.toString();
+    }
+
+    @Override
     public List<String> returnEditableFields() {
         List<String> fieldsList = new ArrayList<>();
         fieldsList.add("name");

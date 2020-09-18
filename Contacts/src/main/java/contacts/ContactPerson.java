@@ -14,7 +14,7 @@ class ContactPerson extends Contact implements Serializable {
         surname = fieldsFactory.createSurname();
         birthdate = fieldsFactory.createBirthdate();
         gender = fieldsFactory.createGender();
-        phoneNumber = fieldsFactory.createNumber(); //General ?
+        phoneNumber = fieldsFactory.createNumber();
         timeCreated = fieldsFactory.createTimeCreated();
         timeEdited = fieldsFactory.createTimeEdited();
     }
@@ -28,6 +28,15 @@ class ContactPerson extends Contact implements Serializable {
                 + "Number: " + phoneNumber.toString() + "\n"
                 + "Time created: " + timeCreated.toString() + "\n"
                 + "Time last edit: " + timeEdited.toString();
+    }
+
+    @Override
+    public String fieldsString() {
+        return name.toString() + " "
+                + surname.toString() + " "
+                + birthdate.toString() + " "
+                + gender.toString() + " "
+                + phoneNumber.toString();
     }
 
     @Override

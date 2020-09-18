@@ -16,4 +16,6 @@ abstract class Contact implements Serializable {
     public abstract void editField(String fieldToEdit, String value);
 
     public abstract String getFieldValue(String field);
+
+    public abstract String fieldsString();
 }

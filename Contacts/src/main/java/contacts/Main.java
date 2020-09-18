@@ -13,7 +13,7 @@ public class Main {
         if (args.length == 2 && "open".equals(args[0])) {
             File file = new File(args[1]);
             if (file.isFile()) {
-                phonebook.phonebookContactList = SerializationUtils.loadPhonebook(args[1]);
+                phonebook.contactList = SerializationUtils.loadPhonebook(args[1]);
                 phonebook.workWithFile = true;
             } else {
                 try {
