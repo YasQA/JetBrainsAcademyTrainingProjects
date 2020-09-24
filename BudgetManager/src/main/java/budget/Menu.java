@@ -3,6 +3,21 @@ package budget;
 public class Menu {
     Budget budget;
 
+    final String addPurchaseMenuString =
+            "1) Food\n" +
+            "2) Clothes\n" +
+            "3) Entertainment\n" +
+            "4) Other\n" +
+            "5) Back";
+
+    final String showPurchaseMenuString =
+            "1) Food\n" +
+            "2) Clothes\n" +
+            "3) Entertainment\n" +
+            "4) Other\n" +
+            "5) All\n" +
+            "6) Back";
+
     public Menu(Budget budget) {
         this.budget = budget;
     }
@@ -41,5 +56,4 @@ public class Menu {
                 System.out.println();
         }
     }
-
 }
