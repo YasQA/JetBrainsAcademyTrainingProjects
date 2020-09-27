@@ -3,6 +3,15 @@ package budget;
 public class Menu {
     Budget budget;
 
+    final String mainMenuString =
+            "1) Add income\n" +
+            "2) Add purchase\n" +
+            "3) Show list of purchases\n" +
+            "4) Balance\n" +
+            "5) Save\n" +
+            "6) Load\n" +
+            "0) Exit";
+
     final String addPurchaseMenuString =
             "1) Food\n" +
             "2) Clothes\n" +
@@ -23,13 +32,7 @@ public class Menu {
     }
 
     public void displayMainMenu() {
-        String mainMenuString = "Choose your action:\n"
-                + "1) Add income\n"
-                + "2) Add purchase\n"
-                + "3) Show list of purchases\n"
-                + "4) Balance\n"
-                + "0) Exit";
-
+        System.out.println("Choose your action:");
         System.out.println(mainMenuString);
     }
 
@@ -47,6 +50,12 @@ public class Menu {
                 break;
             case "4":
                 budget.showBalance();
+                break;
+            case "5":
+                budget.save();
+                break;
+            case "6":
+                budget.load();
                 break;
             case "0":
                 budget.exit();

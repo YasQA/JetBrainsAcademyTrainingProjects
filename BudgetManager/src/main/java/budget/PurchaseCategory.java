@@ -1,5 +1,7 @@
 package budget;
 
-public enum PurchaseCategory {
-    FOOD, CLOSES, ENTERTAINMENT, OTHER;
+import java.io.Serializable;
+
+public enum PurchaseCategory implements Serializable {
+    FOOD, CLOTHES, ENTERTAINMENT, OTHER;
 }

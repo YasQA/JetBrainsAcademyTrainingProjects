@@ -1,16 +1,24 @@
 package budget;
 
+import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Budget {
-    private double balance = 0;
-    boolean isON = true;
+public class Budget implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private double balance;
+    public boolean isON;
 
-    Menu menu = new Menu(this);
+    public transient Menu menu = new Menu(this);
 
-    List<Purchase> purchaseList = new ArrayList<>();
-    List<Income> incomeList = new ArrayList<>();
+    public List<Purchase> purchaseList = new ArrayList<>();
+    public List<Income> incomeList = new ArrayList<>();
+
+    public Budget() {
+        balance = 0;
+        isON = true;
+    }
 
     public double getPurchasesSum() {
         double purchaseSum = 0;
@@ -50,9 +58,9 @@ public class Budget {
 
     public void addPurchase() {
         boolean isOnAddPurchase = true;
+        PurchaseCategory category;
         String purchaseName;
         double purchasePrice;
-        Purchase.Builder purchaseBuilder = new Purchase.Builder();
         while (isOnAddPurchase) {
 
             System.out.println("Choose the type of purchase");
@@ -69,22 +77,30 @@ public class Budget {
                 isOnAddPurchase = false;
 
             } else {
-                purchaseBuilder.setCategory(getPurchaseCategoryByNumber(menuItemSelected));
+                category = getPurchaseCategoryByNumber(menuItemSelected);
 
                 System.out.println("Enter purchase name:");
                 purchaseName = Main.sc.nextLine();
                 System.out.println("Enter its price:");
                 purchasePrice = Double.parseDouble(Main.sc.nextLine());
 
-                Purchase purchase = purchaseBuilder
-                        .setName(purchaseName)
-                        .setPrice(purchasePrice)
-                        .build();
+                switch (category) {
+                    case FOOD:
+                        purchaseList.add(new Food(purchaseName, purchasePrice));
+                        break;
+                    case CLOTHES:
+                        purchaseList.add(new Clothes(purchaseName, purchasePrice));
+                        break;
+                    case ENTERTAINMENT:
+                        purchaseList.add(new Entertainment(purchaseName, purchasePrice));
+                        break;
+                    case OTHER:
+                        purchaseList.add(new Other(purchaseName, purchasePrice));
+                        break;
+                }
 
-                purchaseList.add(purchase);
-                balance -= purchasePrice;
+                setBalance(getBalance() - purchasePrice);
                 System.out.println("Purchase was added!");
-
                 System.out.println();
             }
         }
@@ -95,7 +111,7 @@ public class Budget {
             case 1:
                 return PurchaseCategory.FOOD;
             case 2:
-                return PurchaseCategory.CLOSES;
+                return PurchaseCategory.CLOTHES;
             case 3:
                 return PurchaseCategory.ENTERTAINMENT;
             default:
@@ -112,7 +128,6 @@ public class Budget {
                 System.out.println("Choose the type of purchases");
                 System.out.println(menu.showPurchaseMenuString);
                 int menuItemSelected = Integer.parseInt(Main.sc.nextLine());
-                System.out.println();
 
                 if (menuItemSelected > 6 || menuItemSelected < 1) {
                     System.out.println("Wrong number!");
@@ -122,6 +137,7 @@ public class Budget {
                     isOnListPurchase = false;
 
                 } else if (menuItemSelected == 5) {
+                    System.out.println();
                     System.out.println("All:");
                     for (Purchase purchase : purchaseList) {
                         System.out.println(purchase.toString());
@@ -140,6 +156,8 @@ public class Budget {
                         }
                     }
 
+                    System.out.println();
+
                     if (categoryList.size() == 0) {
                         System.out.println(category + ":");
                         System.out.println("Purchase list is empty!");
@@ -153,6 +171,25 @@ public class Budget {
                 }
                 System.out.println();
             }
+        }
+    }
+
+    public void save() {
+        SerializationUtils.saveBudget(this, Main.fileName);
+        System.out.println("Purchases were saved!");
+        System.out.println();
+    }
+
+    public void load() {
+        File file = new File(Main.fileName);
+        if (file.isFile()) {
+            Budget tempBudget = SerializationUtils.loadBudget(file.getName());
+            this.balance = tempBudget.balance;
+            this.purchaseList = tempBudget.purchaseList;
+            this.incomeList = tempBudget.incomeList;
+            System.out.println("Purchases were loaded!");
+        } else {
+            System.out.println("Cannot load data, file is not available!");
         }
         System.out.println();
     }

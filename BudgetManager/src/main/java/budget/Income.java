@@ -1,6 +1,8 @@
 package budget;
 
-public class Income {
+import java.io.Serializable;
+
+public class Income implements Serializable {
     private double income;
 
     public double getIncome() {
