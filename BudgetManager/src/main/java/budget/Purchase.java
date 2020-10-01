@@ -26,6 +26,18 @@ public class Purchase implements Serializable {
         return category;
     }
 
+
+    public int compareTo(Purchase element) {
+        int res = 0;
+        if (this.price < element.getPrice()) {
+            res = -1;
+        }
+        if (this.price > element.getPrice()) {
+            res = 1;
+        }
+        return res;
+    }
+
     @Override
     public String toString() {
         return getName() + " $" + String.format("%.2f", getPrice());

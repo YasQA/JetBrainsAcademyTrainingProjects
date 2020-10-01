@@ -20,14 +20,6 @@ public class Budget implements Serializable {
         isON = true;
     }
 
-    public double getPurchasesSum() {
-        double purchaseSum = 0;
-        for (Purchase purchase : purchaseList) {
-            purchaseSum += purchase.getPrice();
-        }
-        return purchaseSum;
-    }
-
     public double getBalance() {
         return balance;
     }
@@ -64,20 +56,20 @@ public class Budget implements Serializable {
         while (isOnAddPurchase) {
 
             System.out.println("Choose the type of purchase");
-            System.out.println(menu.addPurchaseMenuString);
+            System.out.println(Menu.ADD_PURCHASE_MENU);
 
             int menuItemSelected = Integer.parseInt(Main.sc.nextLine());
             System.out.println();
 
             if (menuItemSelected > 5 || menuItemSelected < 1) {
-                System.out.println("Wrong number!");
+                System.out.println("Wrong selection!");
                 System.out.println();
 
             } else if (menuItemSelected == 5) {
                 isOnAddPurchase = false;
 
             } else {
-                category = getPurchaseCategoryByNumber(menuItemSelected);
+                category = PurchaseCategory.getByNumber(menuItemSelected);
 
                 System.out.println("Enter purchase name:");
                 purchaseName = Main.sc.nextLine();
@@ -106,27 +98,18 @@ public class Budget implements Serializable {
         }
     }
 
-    public PurchaseCategory getPurchaseCategoryByNumber(int number) {
-        switch (number) {
-            case 1:
-                return PurchaseCategory.FOOD;
-            case 2:
-                return PurchaseCategory.CLOTHES;
-            case 3:
-                return PurchaseCategory.ENTERTAINMENT;
-            default:
-                return PurchaseCategory.OTHER;
-        }
-    }
-
     public void listPurchases() {
         boolean isOnListPurchase = true;
+        List<Purchase> categoryList;
+        PurchaseCategory category;
+        double categorySum;
+
         if (purchaseList.size() == 0) {
             System.out.println("Purchase list is empty");
         } else {
             while (isOnListPurchase) {
                 System.out.println("Choose the type of purchases");
-                System.out.println(menu.showPurchaseMenuString);
+                System.out.println(Menu.SHOW_PURCHASE_MENU);
                 int menuItemSelected = Integer.parseInt(Main.sc.nextLine());
 
                 if (menuItemSelected > 6 || menuItemSelected < 1) {
@@ -142,19 +125,12 @@ public class Budget implements Serializable {
                     for (Purchase purchase : purchaseList) {
                         System.out.println(purchase.toString());
                     }
-                    System.out.println("Total sum: $" + String.format("%.2f", getPurchasesSum()));
+                    System.out.println("Total sum: $" + String.format("%.2f", Helpers.getPurchasesSum(purchaseList)));
 
                 } else {
-                    double categorySum = 0;
-                    List<Purchase> categoryList = new ArrayList<>();
-                    PurchaseCategory category = getPurchaseCategoryByNumber(menuItemSelected);
-
-                    for (Purchase purchase : purchaseList) {
-                        if (category.equals(purchase.getCategory())) {
-                            categoryList.add(purchase);
-                            categorySum += purchase.getPrice();
-                        }
-                    }
+                    category = PurchaseCategory.getByNumber(menuItemSelected);
+                    categoryList = getCategoryList(category);
+                    categorySum = PurchaseCategorySum.getSum(category, purchaseList);
 
                     System.out.println();
 
@@ -172,6 +148,17 @@ public class Budget implements Serializable {
                 System.out.println();
             }
         }
+    }
+
+    public List<Purchase> getCategoryList(PurchaseCategory category) {
+        List<Purchase> categoryList = new ArrayList<>();
+
+        for (Purchase purchase : purchaseList) {
+            if (category.equals(purchase.getCategory())) {
+                categoryList.add(purchase);
+            }
+        }
+        return  categoryList;
     }
 
     public void save() {
@@ -192,6 +179,38 @@ public class Budget implements Serializable {
             System.out.println("Cannot load data, file is not available!");
         }
         System.out.println();
+    }
+
+    public void sort() {
+        boolean isOnSort = true;
+
+        while (isOnSort) {
+            System.out.println("How do you want to sort?");
+            System.out.println(Menu.SORT_MENU);
+
+            int menuItemSelected = Integer.parseInt(Main.sc.nextLine());
+            System.out.println();
+
+            if (menuItemSelected > 4 || menuItemSelected < 1) {
+                System.out.println("Wrong selection!");
+                System.out.println();
+
+            } else if (menuItemSelected == 4) {
+                isOnSort = false;
+            } else {
+                switch (menuItemSelected) {
+                    case 1:
+                        Analyze.sortAll(purchaseList);
+                        break;
+                    case 2:
+                        Analyze.sortByType(purchaseList);
+                        break;
+                    case 3:
+                        Analyze.sortCertainType(purchaseList);
+                        break;
+                }
+            }
+        }
     }
 
     public void exit() {
