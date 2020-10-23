@@ -1,40 +1,79 @@
 package engine.api;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import engine.model.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @RestController
 public class TaskController {
-
-    String title = "The Java Logo";
-    String text = "What is depicted on the Java logo?";
-
-    Option option1 = new Option("Robot", false);
-    Option option2 = new Option("Tea leaf", false);
-    Option option3 = new Option("Cup of coffee", true);
-    Option option4 = new Option("Bug", false);
-
-//    Options options = new Options(Arrays.asList(option1, option2, option3, option4)); #####################
-
-    List<String> options = Arrays.asList(option1.getText(), option2.getText(), option3.getText(), option4.getText());
-    Quiz quiz = new Quiz(title, text, options, 2);
+    @Autowired
+    private Quizzes quizzes;
 
     public TaskController() {
     }
 
-    @GetMapping(path = "/api/quiz")
-    public Quiz getQuiz() {
-        return quiz;
+    //Get a quiz by id
+    @GetMapping(path = "/api/quizzes/{id}")
+    public ResponseEntity<Quiz> getQuiz(@PathVariable int id) {
+        try {
+            return new ResponseEntity<>(
+                    quizzes.getQuizById(id),
+                    HttpStatus.OK);
+        } catch (QuizNotFoundException exception) {
+            return new ResponseEntity<>(
+                    null,
+                    HttpStatus.NOT_FOUND);
+        }
     }
 
-    @PostMapping(path = "/api/quiz")
-    public QuizResult addTask(@RequestParam("answer") String answer) {
-        QuizResult result = new QuizResult(Integer.parseInt(answer) == 2); //##################
-        return result;
+    // Get all quizzes
+    @GetMapping(path = "/api/quizzes")
+    public ResponseEntity<List<Quiz>> getQuizzes() {
+        return new ResponseEntity<>(
+                quizzes.getList(),
+                HttpStatus.OK);
+    }
+
+    // Solving a quiz
+    @PostMapping(path = "/api/quizzes/{id}/solve")
+    public ResponseEntity<QuizResult> solveQuiz(@PathVariable int id, @RequestParam("answer") String answer) {
+        try {
+            QuizResult result = new QuizResult(quizzes.getQuizById(id).getAnswer() == Integer.parseInt(answer));
+            return new ResponseEntity<>(
+                    result,
+                    HttpStatus.OK);
+        } catch (QuizNotFoundException exception) {
+            return new ResponseEntity<>(
+                    null,
+                    HttpStatus.NOT_FOUND);
+        }
+    }
+
+    // Create a new quiz
+    @PostMapping(path = "/api/quizzes", consumes = "application/json")
+    public Quiz addQuiz(@RequestBody JsonNode jsonNode) {
+        List<String> options = new ArrayList<>();
+        Iterator<JsonNode> iterator = jsonNode.get("options").elements();
+
+        while (iterator.hasNext()) {
+            JsonNode opt = iterator.next();
+            options.add(opt.asText());
+        }
+
+        Quiz quiz = new Quiz(quizzes.getId(),
+                jsonNode.get("title").asText(),
+                jsonNode.get("text").asText(),
+                options,
+                jsonNode.get("answer").asInt());
+
+        quizzes.addQuiz(quiz);
+
+        return quiz;
     }
 
 }
