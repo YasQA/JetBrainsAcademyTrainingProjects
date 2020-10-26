@@ -1,12 +1,12 @@
 package engine.api;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import engine.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.*;
 
 @RestController
@@ -40,13 +40,13 @@ public class TaskController {
     }
 
     // Solving a quiz
-    @PostMapping(path = "/api/quizzes/{id}/solve")
-    public ResponseEntity<QuizResult> solveQuiz(@PathVariable int id, @RequestParam("answer") String answer) {
+    @PostMapping(path = "/api/quizzes/{id}/solve", consumes = "application/json")
+    public ResponseEntity<QuizResult> solveQuiz(@PathVariable int id, @RequestBody Answer answer) {
         try {
-            QuizResult result = new QuizResult(quizzes.getQuizById(id).getAnswer() == Integer.parseInt(answer));
             return new ResponseEntity<>(
-                    result,
+                    new QuizResult(quizzes.getQuizById(id).answerEqualsTo(answer.getAnswer())),
                     HttpStatus.OK);
+
         } catch (QuizNotFoundException exception) {
             return new ResponseEntity<>(
                     null,
@@ -56,24 +56,11 @@ public class TaskController {
 
     // Create a new quiz
     @PostMapping(path = "/api/quizzes", consumes = "application/json")
-    public Quiz addQuiz(@RequestBody JsonNode jsonNode) {
-        List<String> options = new ArrayList<>();
-        Iterator<JsonNode> iterator = jsonNode.get("options").elements();
-
-        while (iterator.hasNext()) {
-            JsonNode opt = iterator.next();
-            options.add(opt.asText());
+    public Quiz addQuiz(@Valid @RequestBody Quiz quiz) {
+        if (quiz.getAnswer() == null) {
+            quiz.setAnswer(new ArrayList<>());
         }
-
-        Quiz quiz = new Quiz(quizzes.getId(),
-                jsonNode.get("title").asText(),
-                jsonNode.get("text").asText(),
-                options,
-                jsonNode.get("answer").asInt());
-
         quizzes.addQuiz(quiz);
-
         return quiz;
     }
-
 }

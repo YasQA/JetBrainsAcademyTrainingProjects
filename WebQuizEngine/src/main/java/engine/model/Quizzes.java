@@ -10,9 +10,8 @@ import java.util.stream.IntStream;
 
 @Component
 public class Quizzes {
-    private static int id = 0; //remember place to add new Quiz
+    private static int id = 0; //remember id to add new Quiz
     private List<Quiz> list = new ArrayList<>();
-    //private Map<Integer, Quiz> list1 = new HashMap<>();
 
     public Quizzes() {};
 
@@ -21,6 +20,7 @@ public class Quizzes {
     }
 
     public void addQuiz(Quiz quiz) {
+        quiz.setId(id);
         list.add(quiz);
         id++;
     }
