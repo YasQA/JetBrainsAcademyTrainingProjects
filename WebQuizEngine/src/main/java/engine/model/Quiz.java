@@ -1,27 +1,40 @@
 package engine.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+//import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
 //@JsonIgnoreProperties(allowSetters = true, value = { "answer" })
+@Entity
 public class Quiz {
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    //private Long id;
+
     @NotEmpty(message = "title is required")
-    private final String title;
+    private String title;
+
     @NotEmpty(message = "text is required")
-    private final String text;
+    private String text;
+
+    @ElementCollection(targetClass=String.class)
     @NotEmpty
     @Size(min = 2, message = "should contain at least 2 items")
-    private final List<String> options;
+    private List<String> options;
+
+    @ElementCollection(targetClass=Integer.class)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<Integer> answer;
 
-    public Quiz (int id, String title, String text, List<String> options, List<Integer> answer) {
+    protected Quiz() {}
+
+    public Quiz (Long id, String title, String text, List<String> options, List<Integer> answer) {
         this.id = id;
         this.title = title;
         this.text = text;
@@ -29,11 +42,11 @@ public class Quiz {
         this.answer = answer;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -49,8 +62,8 @@ public class Quiz {
         return options;
     }
 
-    public void setOptions(List<Integer> answer) {
-        this.answer = answer;
+    public void setOptions(List<String> options) {
+        this.options = options;
     }
 
     public List<Integer> getAnswer() {
@@ -62,13 +75,7 @@ public class Quiz {
     }
 
     public boolean answerEqualsTo(List<Integer> newAnswer) {
-        if(answer == null) {
-            answer = new ArrayList<>();
-        }
-
-        if(answer.containsAll(newAnswer) && newAnswer.containsAll(answer)) {
-            return true;
-        }
-        return false;
+        answer = answer != null ? answer : new ArrayList<>();
+        return (answer.containsAll(newAnswer) && newAnswer.containsAll(answer));
     }
 }

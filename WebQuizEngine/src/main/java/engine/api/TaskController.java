@@ -1,10 +1,11 @@
 package engine.api;
 
+import engine.dao.QuizRepository;
 import engine.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.util.*;
@@ -12,45 +13,36 @@ import java.util.*;
 @RestController
 public class TaskController {
     @Autowired
-    private Quizzes quizzes;
+    private QuizRepository quizzes;
 
     public TaskController() {
     }
 
     //Get a quiz by id
     @GetMapping(path = "/api/quizzes/{id}")
-    public ResponseEntity<Quiz> getQuiz(@PathVariable int id) {
-        try {
-            return new ResponseEntity<>(
-                    quizzes.getQuizById(id),
-                    HttpStatus.OK);
-        } catch (QuizNotFoundException exception) {
-            return new ResponseEntity<>(
-                    null,
-                    HttpStatus.NOT_FOUND);
+    public Quiz getQuiz(@PathVariable Long id) {
+        if (quizzes.findById(id).isPresent()) {
+            return quizzes.findById(id).get();
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
     }
 
     // Get all quizzes
     @GetMapping(path = "/api/quizzes")
-    public ResponseEntity<List<Quiz>> getQuizzes() {
-        return new ResponseEntity<>(
-                quizzes.getList(),
-                HttpStatus.OK);
+    public List<Quiz> getQuizzes() {
+        List<Quiz> quizList = new ArrayList<>();
+        quizzes.findAll().forEach(quizList::add);
+        return quizList;
     }
 
     // Solving a quiz
     @PostMapping(path = "/api/quizzes/{id}/solve", consumes = "application/json")
-    public ResponseEntity<QuizResult> solveQuiz(@PathVariable int id, @RequestBody Answer answer) {
-        try {
-            return new ResponseEntity<>(
-                    new QuizResult(quizzes.getQuizById(id).answerEqualsTo(answer.getAnswer())),
-                    HttpStatus.OK);
-
-        } catch (QuizNotFoundException exception) {
-            return new ResponseEntity<>(
-                    null,
-                    HttpStatus.NOT_FOUND);
+    public QuizResult solveQuiz(@PathVariable Long id, @RequestBody Answer answer) {
+        if (quizzes.findById(id).isPresent()) {
+            return new QuizResult(quizzes.findById(id).get().answerEqualsTo(answer.getAnswer()));
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -60,7 +52,7 @@ public class TaskController {
         if (quiz.getAnswer() == null) {
             quiz.setAnswer(new ArrayList<>());
         }
-        quizzes.addQuiz(quiz);
+        quizzes.save(quiz);
         return quiz;
     }
 }
